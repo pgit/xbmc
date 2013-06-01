@@ -247,9 +247,17 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
           object.m_ReferenceID = NPT_String::Format("videodb://1/2/%i", tag.m_iDbId);
         } else {
           object.m_ObjectClass.type = "object.item.videoItem.videoBroadcast";
-          object.m_Recorded.program_title  = "S" + ("0" + NPT_String::FromInteger(tag.m_iSeason)).Right(2);
-          object.m_Recorded.program_title += "E" + ("0" + NPT_String::FromInteger(tag.m_iEpisode)).Right(2);
-          object.m_Recorded.program_title += " : " + tag.m_strTitle;
+	  object.m_Recorded.program_title = "S";
+	  if (0 <= tag.m_iSeason &&  tag.m_iSeason < 10)
+              object.m_Recorded.program_title += "0";
+	  object.m_Recorded.program_title += NPT_String::FromInteger(tag.m_iSeason);
+	  
+	  object.m_Recorded.program_title += "E";
+          if (0 <= tag.m_iEpisode && tag.m_iEpisode < 10)
+              object.m_Recorded.program_title += "0";
+	  object.m_Recorded.program_title += NPT_String::FromInteger(tag.m_iEpisode);
+
+	  object.m_Recorded.program_title += " : " + tag.m_strTitle;
           object.m_Recorded.series_title = tag.m_strShowTitle;
           int season = tag.m_iSeason > 1 ? tag.m_iSeason : 1;
           object.m_Recorded.episode_number = season * 100 + tag.m_iEpisode;
@@ -620,7 +628,7 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
         int episode;
         int season;
         int title = object.m_Recorded.program_title.Find(" : ");
-        if(sscanf(object.m_Recorded.program_title, "S%2dE%2d", &season, &episode) == 2 && title >= 0) {
+        if(sscanf(object.m_Recorded.program_title, "S%2dE%d", &season, &episode) == 2 && title >= 0) {
             tag.m_strTitle = object.m_Recorded.program_title.SubString(title + 3);
             tag.m_iEpisode = episode;
             tag.m_iSeason  = season;
